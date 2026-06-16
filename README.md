@@ -7,14 +7,14 @@
   <a href="https://pepy.tech/projects/yreport">
     <img src="https://static.pepy.tech/personalized-badge/yreport?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads">
   </a>
-  <img src="https://img.shields.io/github/license/Yogesh942134/yreport">
-  <a href="https://github.com/Yogesh942134/yreport/actions/workflows/ci.yml">
-    <img src="https://github.com/Yogesh942134/yreport/actions/workflows/ci.yml/badge.svg" alt="CI Status">
+  <img src="https://img.shields.io/github/license/yogeshkardile/yreport">
+  <a href="https://github.com/yogeshkardile/yreport/actions/workflows/ci.yml">
+    <img src="https://github.com/yogeshkardile/yreport/actions/workflows/ci.yml/badge.svg" alt="CI Status">
   </a>
   <a href="https://www.python.org/downloads/">
     <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10+">
   </a>
-  <a href="https://github.com/Yogesh942134/yreport">
+  <a href="https://github.com/yogeshkardile/yreport">
     <img src="https://img.shields.io/badge/coverage-94%25-brightgreen.svg" alt="Coverage 94%">
   </a>
 </p>
@@ -69,7 +69,7 @@ pip install yreport
 ### Install from source (recommended)
 
 ```bash
-git clone https://github.com/Yogesh942134/yreport.git
+git clone https://github.com/yogeshkardile/yreport.git
 cd yreport
 pip install -e .
 ```
@@ -271,4 +271,4 @@ This is intentional. yreport is a diagnostics layer, not a transformation layer.
 
 ## License
 
-This project is licensed under the terms specified in the [LICENSE](https://github.com/Yogesh942134/yreport/blob/main/LICENSE) file.
+This project is licensed under the terms specified in the [LICENSE](https://github.com/yogeshkardile/yreport/blob/main/LICENSE) file.
