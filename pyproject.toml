@@ -31,8 +31,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Yogesh942134/yreport"
-Repository = "https://github.com/Yogesh942134/yreport"
+Homepage = "https://github.com/yogeshkardile/yreport"
+Repository = "https://github.com/yogeshkardile/yreport"
 
 [tool.black]
 line-length = 88
