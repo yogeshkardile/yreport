@@ -19,13 +19,11 @@
   </a>
 </p>
 
----
 
 yreport is a lightweight, pipeline-ready data validation and deep diagnostics library for tabular ML datasets. It analyses data quality, detects potential issues, and provides honest, actionable diagnostics without making unsafe assumptions.
 
 Unlike heavy EDA tools, yreport is designed to be pipeline-friendly, explainable, configurable, and production-aware.
 
----
 
 ## Why yreport?
 
@@ -42,7 +40,6 @@ It helps answer:
 - Are my datetime columns healthy and leakage-free?
 - Which categorical columns will drift in production?
 
----
 
 ## Features
 
@@ -63,7 +60,6 @@ It helps answer:
   - Missing pattern clustering (MCAR / MAR / MNAR inference)
   - Temporal leakage detection
 
----
 
 ## Installation
 
@@ -81,7 +77,6 @@ cd yreport
 pip install -e .
 ```
 
----
 
 ## Core Concept
 
@@ -99,7 +94,6 @@ It does not:
 
 This makes it safe and transparent.
 
----
 
 ## Quick Start
 
@@ -145,7 +139,6 @@ Temporal Leakage Detection:
   - booking_date: no leakage detected (confidence=LOW)
 ```
 
----
 
 ## What the Report Includes
 
@@ -217,7 +210,6 @@ Scans datetime columns for train/test leakage risks:
 - High index correlation (> 0.95) — column encodes row ordering
 - Near-duplicate datetime columns (correlation > 0.98)
 
----
 
 ## User Overrides
 
@@ -245,7 +237,6 @@ data_health_report(
 - A column belongs to only one semantic type
 - Ignored or dropped columns are excluded everywhere
 
----
 
 ## Exporting Reports
 
@@ -279,7 +270,6 @@ report.to_markdown("report.md")
 
 The Markdown report includes all sections including deep diagnostics, with a formatted table for missing pattern clusters.
 
----
 
 ## scikit-learn Pipeline Integration
 
@@ -313,7 +303,6 @@ leakage = pipe.named_steps["inspect"].report_.leakage_report
 - Data remains unchanged
 - Full report (including deep diagnostics) is available after `fit()`
 
----
 
 ## Report Fields Reference
 
@@ -332,7 +321,6 @@ leakage = pipe.named_steps["inspect"].report_.leakage_report
 | `missing_patterns` | dict | MCAR/MAR/MNAR cluster analysis *(v0.1.4)* |
 | `leakage_report` | dict | Temporal leakage risks per datetime column *(v0.1.4)* |
 
----
 
 ## Testing
 
@@ -347,7 +335,6 @@ Includes:
 - Core API regression protection
 - Deep diagnostics coverage
 
----
 
 ## Design Philosophy
 
@@ -360,7 +347,6 @@ Includes:
 
 yreport will never silently apply transformations.
 
----
 
 ## What yreport is NOT
 
@@ -371,7 +357,6 @@ yreport will never silently apply transformations.
 
 This is intentional. yreport is a diagnostics layer, not a transformation layer.
 
----
 
 ## License
 
