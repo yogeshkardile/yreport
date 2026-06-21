@@ -37,13 +37,13 @@ class YReportInspector(BaseEstimator, TransformerMixin):
         self.numerical_cols = numerical_cols
         self.ignore_cols = ignore_cols
 
-    def fit(self, X, y=None):
+    def fit(self, x, y=None):
         """
         Run the data health report on X and store as self.report_.
         Follows sklearn convention: X not modified, y ignored.
         """
         self.report_ = data_health_report(
-            X,
+            x,
             drop_cols=self.drop_cols,
             categorical_cols=self.categorical_cols,
             numeric_cols=self.numerical_cols,   # maps to health.py param name
@@ -51,9 +51,9 @@ class YReportInspector(BaseEstimator, TransformerMixin):
         )
         return self
 
-    def transform(self, X):
+    def transform(self, x):
         """
         Pass X through unchanged.
         YReportInspector is a diagnostic tool, not a data mutator.
         """
-        return X
+        return x

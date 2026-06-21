@@ -43,9 +43,7 @@ class DataHealthReport:
         self.missing_patterns     = missing_patterns or {}
         self.leakage_report       = leakage_report or {}
 
-    # ------------------------------------------------------------------
     # summary()
-    # ------------------------------------------------------------------
 
     def summary(self) -> None:
         """Print a human-readable summary of the full data health report."""
@@ -114,9 +112,7 @@ class DataHealthReport:
                 print(f"  - {col}: {info['recommendation']} "
                       f"(confidence={info['confidence']})")
 
-    # ------------------------------------------------------------------
     # to_dict()
-    # ------------------------------------------------------------------
 
     def to_dict(self) -> dict:
         """
@@ -139,9 +135,7 @@ class DataHealthReport:
             "leakage_report":        self.leakage_report,
         }
 
-    # ------------------------------------------------------------------
     # to_json()
-    # ------------------------------------------------------------------
 
     def to_json(self, path: str | None = None) -> dict:
         """
@@ -159,9 +153,7 @@ class DataHealthReport:
 
         return data
 
-    # ------------------------------------------------------------------
     # to_markdown()
-    # ------------------------------------------------------------------
 
     def to_markdown(self, path: str | None = None) -> str:
         """
@@ -248,7 +240,7 @@ class DataHealthReport:
                 lines.append(f"- **Future Dates:** {info.get('future_dates', 0)}")
                 lines.append(f"- **Monotonic:** {info.get('is_monotonic', 'N/A')}")
                 for issue in info.get("issues", []):
-                    lines.append(f"- ⚠️ {issue}")
+                    lines.append(f"-  {issue}")
                 lines.append(f"- **Recommendation:** {info.get('recommendation', '')}")
             lines.append("")
 
@@ -262,7 +254,7 @@ class DataHealthReport:
                 lines.append(f"- **Rare Categories:** {info['rare_category_count']}")
                 lines.append(f"- **Entropy:** {info['entropy']}")
                 for risk in info.get("drift_risks", []):
-                    lines.append(f"- ⚠️ {risk}")
+                    lines.append(f"-  {risk}")
                 lines.append(
                     f"- **Recommendation:** {info['recommendation']} "
                     f"(Confidence: {info['confidence']})"
@@ -292,7 +284,7 @@ class DataHealthReport:
                 lines.append(f"### {col}")
                 lines.append(f"- **Future Dates:** {info.get('future_dates', 0)}")
                 for risk in info.get("leakage_risks", []):
-                    lines.append(f"- ⚠️ {risk}")
+                    lines.append(f"-  {risk}")
                 lines.append(
                     f"- **Recommendation:** {info['recommendation']} "
                     f"(Confidence: {info['confidence']})"

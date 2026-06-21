@@ -240,7 +240,7 @@ class TestExportMethods:
         assert "## Numeric Diagnostics" in md
         assert "Duplicate Rows"       in md   # added in fix session
 
-    def test_to_markdown_includes_deep_diagnostics(tmp_path):
+    def test_to_markdown_includes_deep_diagnostics(self,tmp_path):
         """Markdown must include v0.1.4 sections when data warrants them."""
         dates = pd.date_range("2023-01-01", periods=20, freq="D")
         df = pd.DataFrame({"event_date": dates, "val": range(20), "cat": ["A"] * 20})
@@ -330,7 +330,7 @@ class TestPipelineIntegration:
 
         from yreport import YReportInspector
 
-        X = pd.DataFrame({"num": [1, 2, 3, 4], "cat": ["a", "b", "a", "b"]})
+        x = pd.DataFrame({"num": [1, 2, 3, 4], "cat": ["a", "b", "a", "b"]})
         y = [0, 1, 0, 1]
 
         preprocessor = ColumnTransformer(
@@ -346,23 +346,24 @@ class TestPipelineIntegration:
                 ("model",        LogisticRegression()),
             ]
         )
-        pipe.fit(X, y)
+        pipe.fit(x, y)
 
         inspector = pipe.named_steps["inspect"]
         assert hasattr(inspector, "report_")
-        assert len(pipe.predict(X)) == len(X)
+        assert len(pipe.predict(x)) == len(x)
 
     def test_pipeline_report_has_deep_diagnostics(self):
         """Report stored inside the pipeline must include v0.1.4 fields."""
         from sklearn.pipeline import Pipeline
+
         from yreport import YReportInspector
 
         dates = pd.date_range("2023-01-01", periods=10, freq="D")
-        X = pd.DataFrame({"val": range(10), "date": dates})
+        x = pd.DataFrame({"val": range(10), "date": dates})
         y = [0, 1] * 5
 
         pipe = Pipeline([("inspect", YReportInspector()), ("passthrough", "passthrough")])
-        pipe.fit(X, y)
+        pipe.fit(x, y)
 
         report = pipe.named_steps["inspect"].report_
         assert isinstance(report.datetime_diagnostics, dict)
@@ -374,11 +375,11 @@ class TestPipelineIntegration:
         """YReportInspector.transform must return X unchanged."""
         from yreport import YReportInspector
 
-        X = pd.DataFrame({"a": [1, 2, 3], "b": ["x", "y", "z"]})
+        x = pd.DataFrame({"a": [1, 2, 3], "b": ["x", "y", "z"]})
         inspector = YReportInspector()
-        inspector.fit(X)
-        result = inspector.transform(X)
-        pd.testing.assert_frame_equal(X, result)
+        inspector.fit(x)
+        result = inspector.transform(x)
+        pd.testing.assert_frame_equal(x, result)
 
 
 # 9. v0.1.4 — Datetime Diagnostics (#10)
@@ -553,4 +554,5 @@ class TestTemporalLeakageDetection:
             info = report.leakage_report[col]
             assert "leakage_risks"   in info
             assert "recommendation"  in info
+
             assert "confidence"      in info

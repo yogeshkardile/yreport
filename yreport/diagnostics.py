@@ -327,8 +327,6 @@ def temporal_leakage_detection(df: pd.DataFrame, datetime_cols: list) -> dict:
         if not s.empty:
             parsed[col] = s
 
-    col_names = list(parsed.keys())
-
     for col, series in parsed.items():
         leakage_risks: list[str] = []
 
