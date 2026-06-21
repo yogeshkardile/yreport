@@ -4,33 +4,51 @@ import pandas as pd
 from scipy.stats import skew
 
 
-def generate_recommendations(df: pd.DataFrame, drop_cols, column_types: dict) -> dict:
-    recommendations = {"encoding": {}, "missing": {}}
+def generate_recommendations(df: pd.DataFrame, drop_cols: set, column_types: dict) -> dict:
+    """
+    Produce actionable recommendations for missing-value handling
+    and categorical encoding.
+
+    Parameters
+    ----------
+    df           : The DataFrame being analysed.
+    drop_cols    : User-defined columns to force-drop.
+    column_types : Detected/overridden column type mapping.
+
+    Returns
+    -------
+    dict with keys "encoding" and "missing", each mapping
+    column names to recommendation dicts.
+    """
+    recommendations: dict = {"encoding": {}, "missing": {}}
 
     missing_pct = (df.isnull().mean() * 100).round(2).to_dict()
 
-    # ---- Missing value rules ----
-    for col in missing_pct:
-        if missing_pct[col] > 60:
+    # --- Missing value rules ---
+    for col, pct in missing_pct.items():
+        if pct > 60:
             recommendations["missing"][col] = {
                 "action": "drop",
-                "message": f"{missing_pct[col]}% missing values",
+                "message": f"{pct}% missing values",
                 "confidence": "HIGH",
             }
-        elif missing_pct[col] > 5:
+        elif pct > 5:
             recommendations["missing"][col] = {
                 "action": "impute",
-                "message": f"{missing_pct[col]}% missing values",
+                "message": f"{pct}% missing values",
                 "confidence": "MEDIUM",
             }
 
-    drop_cols = drop_cols | {
+    # Merge auto-detected drops with user-defined drops
+    # (do NOT reassign drop_cols — use a local merged set)
+    auto_drop_cols = {
         col
         for col, info in recommendations["missing"].items()
         if info["action"] == "drop"
     }
+    all_drop_cols = drop_cols | auto_drop_cols
 
-    # Force user-defined drop columns
+    # Force user-defined drop columns into the missing recommendations
     for col in drop_cols:
         recommendations["missing"][col] = {
             "action": "drop",
@@ -38,11 +56,10 @@ def generate_recommendations(df: pd.DataFrame, drop_cols, column_types: dict) ->
             "confidence": "HIGH",
         }
 
-    # ---- Encoding (categorical) ----
-
+    # --- Encoding recommendations (categorical columns only) ---
     for col in column_types["categorical"]:
-        if col in drop_cols:
-            continue
+        if col in all_drop_cols:
+            continue  # skip columns that will be dropped
 
         high_card = df[col].nunique() > 50
 
@@ -55,22 +72,40 @@ def generate_recommendations(df: pd.DataFrame, drop_cols, column_types: dict) ->
             ),
             "confidence": "HIGH" if high_card else "MEDIUM",
         }
+
     return recommendations
 
 
-# numeric diagnostics
+def numeric_diagnostics(df: pd.DataFrame, numeric_cols: list) -> dict:
+    """
+    Compute skewness and IQR-based outlier percentage for each
+    numeric column, and suggest a transform where appropriate.
 
+    Parameters
+    ----------
+    df           : The DataFrame being analysed.
+    numeric_cols : List of column names to treat as numeric.
 
-def numeric_diagnostics(df, numeric_cols):
-    diagnostics = {}
+    Returns
+    -------
+    dict mapping column name → diagnostic info dict.
+    """
+    diagnostics: dict = {}
 
     for col in numeric_cols:
         series = df[col].dropna()
+
         if series.empty:
+            continue
+
+        # Guard: skip if the column is not actually numeric
+        # (can happen when the user manually overrides column types)
+        if not pd.api.types.is_numeric_dtype(series):
             continue
 
         col_skew = skew(series)
 
+        # IQR-based outlier detection
         q1, q3 = np.percentile(series, [25, 75])
         iqr = q3 - q1
         outlier_mask = (series < q1 - 1.5 * iqr) | (series > q3 + 1.5 * iqr)

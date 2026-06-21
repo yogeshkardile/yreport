@@ -5,8 +5,24 @@ from yreport import data_health_report
 
 class YReportInspector(BaseEstimator, TransformerMixin):
     """
-    A sklearn-compatible inspector that generates a yreport
-    during fit and passes data unchanged through the pipeline.
+    A sklearn-compatible inspector that generates a YReport during `fit`
+    and passes data through unchanged during `transform`.
+
+    Designed to sit at the start of a Pipeline so you can inspect the
+    raw data health before any preprocessing steps run.
+
+    Parameters
+    ----------
+    drop_cols       : Columns to force-drop in recommendations.
+    categorical_cols: Columns to force-treat as categorical.
+    numerical_cols  : Columns to force-treat as numeric.
+    ignore_cols     : Columns to exclude entirely from analysis.
+
+    Attributes
+    ----------
+    report_ : DataHealthReport
+        Populated after `fit` is called. Access via
+        ``pipeline.named_steps['inspector'].report_``
     """
 
     def __init__(
@@ -18,20 +34,26 @@ class YReportInspector(BaseEstimator, TransformerMixin):
     ):
         self.drop_cols = drop_cols
         self.categorical_cols = categorical_cols
-        self.ignore_cols = ignore_cols
         self.numerical_cols = numerical_cols
+        self.ignore_cols = ignore_cols
 
-    def fit(self, x, y=None):
-        # Generate and store report
+    def fit(self, X, y=None):
+        """
+        Run the data health report on X and store as self.report_.
+        Follows sklearn convention: X not modified, y ignored.
+        """
         self.report_ = data_health_report(
-            x,
+            X,
             drop_cols=self.drop_cols,
             categorical_cols=self.categorical_cols,
-            numeric_cols=self.numerical_cols,
+            numeric_cols=self.numerical_cols,   # maps to health.py param name
             ignore_cols=self.ignore_cols,
         )
         return self
 
-    def transform(self, x):
-        # IMPORTANT: do nothing to X
-        return x
+    def transform(self, X):
+        """
+        Pass X through unchanged.
+        YReportInspector is a diagnostic tool, not a data mutator.
+        """
+        return X
