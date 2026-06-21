@@ -28,14 +28,15 @@ from yreport.health import data_health_report
 
 # Fixtures
 
+
 @pytest.fixture
 def simple_df():
     """Small, clean DataFrame used across multiple tests."""
     return pd.DataFrame(
         {
-            "age":    [20, 21, None, 23],
+            "age": [20, 21, None, 23],
             "salary": [10000, 15000, 20000, None],
-            "city":   ["A", "B", "B", "A"],
+            "city": ["A", "B", "B", "A"],
         }
     )
 
@@ -47,8 +48,8 @@ def titanic_like_df():
     return pd.DataFrame(
         {
             "mostly_missing": [1] * 20 + [None] * 80,
-            "some_missing":   [1] * 80 + [None] * 20,
-            "high_card":      [str(i) for i in range(n)],
+            "some_missing": [1] * 80 + [None] * 20,
+            "high_card": [str(i) for i in range(n)],
         }
     )
 
@@ -59,15 +60,16 @@ def datetime_df():
     dates = pd.date_range("2023-01-01", periods=50, freq="D")
     return pd.DataFrame(
         {
-            "event_date":  dates,
-            "created_at":  dates,                          # near-duplicate
-            "salary":      np.random.normal(50000, 5000, 50),
-            "category":    np.random.choice(["A", "B", "C"], 50),
+            "event_date": dates,
+            "created_at": dates,  # near-duplicate
+            "salary": np.random.normal(50000, 5000, 50),
+            "category": np.random.choice(["A", "B", "C"], 50),
         }
     )
 
 
 # 1. Basic API correctness
+
 
 class TestBasicReport:
     def test_report_not_none(self, simple_df):
@@ -77,11 +79,19 @@ class TestBasicReport:
     def test_has_required_attributes(self, simple_df):
         report = data_health_report(simple_df)
         for attr in (
-            "health_score", "shape", "column_types", "missing_percentage",
-            "duplicate_rows", "warnings", "recommendations", "numeric",
+            "health_score",
+            "shape",
+            "column_types",
+            "missing_percentage",
+            "duplicate_rows",
+            "warnings",
+            "recommendations",
+            "numeric",
             # v0.1.4 deep diagnostics
-            "datetime_diagnostics", "drift_readiness",
-            "missing_patterns", "leakage_report",
+            "datetime_diagnostics",
+            "drift_readiness",
+            "missing_patterns",
+            "leakage_report",
         ):
             assert hasattr(report, attr), f"Missing attribute: {attr}"
 
@@ -92,7 +102,7 @@ class TestBasicReport:
 
     def test_missing_percentage(self, simple_df):
         report = data_health_report(simple_df)
-        assert report.missing_percentage["age"]    == 25.0
+        assert report.missing_percentage["age"] == 25.0
         assert report.missing_percentage["salary"] == 25.0
 
     def test_duplicate_rows_zero(self, simple_df):
@@ -102,7 +112,7 @@ class TestBasicReport:
     def test_column_typing(self, simple_df):
         report = data_health_report(simple_df)
         assert "city" in report.column_types["categorical"]
-        assert "age"  in report.column_types["numeric"]
+        assert "age" in report.column_types["numeric"]
 
     def test_health_score_range(self, simple_df):
         report = data_health_report(simple_df)
@@ -110,6 +120,7 @@ class TestBasicReport:
 
 
 # 2. Data types and edge cases
+
 
 class TestEdgeCases:
     def test_empty_dataframe(self):
@@ -128,18 +139,18 @@ class TestEdgeCases:
     def test_mixed_types(self):
         df = pd.DataFrame(
             {
-                "int":    [1, 2, 3],
-                "float":  [1.1, 2.2, 3.3],
+                "int": [1, 2, 3],
+                "float": [1.1, 2.2, 3.3],
                 "string": ["!@#", "$%^", "&*()"],
-                "bool":   [True, False, True],
-                "date":   pd.to_datetime(["2021-01-01", "2021-01-02", "2021-01-03"]),
+                "bool": [True, False, True],
+                "date": pd.to_datetime(["2021-01-01", "2021-01-02", "2021-01-03"]),
             }
         )
         report = data_health_report(df)
-        assert "int"    in report.column_types["numeric"]
-        assert "float"  in report.column_types["numeric"]
+        assert "int" in report.column_types["numeric"]
+        assert "float" in report.column_types["numeric"]
         assert "string" in report.column_types["categorical"]
-        assert "date"   in report.column_types["datetime"]
+        assert "date" in report.column_types["datetime"]
 
     def test_single_row(self):
         df = pd.DataFrame({"x": [1], "y": ["a"]})
@@ -153,8 +164,8 @@ class TestEdgeCases:
         assert report.duplicate_rows == 1
 
 
-
 # 3. User overrides
+
 
 class TestUserOverrides:
     def test_categorical_and_ignore_override(self):
@@ -163,7 +174,7 @@ class TestUserOverrides:
         )
         report = data_health_report(df, categorical_cols=["id"], ignore_cols=["score"])
 
-        assert "id"    in report.column_types["categorical"]
+        assert "id" in report.column_types["categorical"]
         assert "score" not in report.column_types["numeric"]
         assert "score" not in report.column_types["categorical"]
         assert report.shape["columns"] == 2  # 'score' was removed
@@ -172,19 +183,21 @@ class TestUserOverrides:
         """Force a string-looking column to numeric."""
         df = pd.DataFrame({"val": ["1", "2", "3"], "label": ["A", "B", "C"]})
         report = data_health_report(df, numeric_cols=["val"])
-        assert "val"   in report.column_types["numeric"]
+        assert "val" in report.column_types["numeric"]
         assert "val" not in report.column_types["categorical"]
 
     def test_drop_cols_preserved(self):
         """User drop_cols must not be overwritten by auto-detection."""
         df = pd.DataFrame(
             {
-                "keep":   [1, 2, 3],
+                "keep": [1, 2, 3],
                 "remove": ["a", "b", "c"],
             }
         )
         report = data_health_report(df, drop_cols=["remove"])
-        assert report.recommendations["missing"].get("remove", {}).get("action") == "drop"
+        assert (
+            report.recommendations["missing"].get("remove", {}).get("action") == "drop"
+        )
 
     def test_ignore_cols_excluded_everywhere(self):
         df = pd.DataFrame({"a": [1, 2], "b": [3, 4], "c": [5, 6]})
@@ -194,6 +207,7 @@ class TestUserOverrides:
 
 
 # 4. Export methods
+
 
 class TestExportMethods:
     def test_to_dict_structure(self, simple_df):
@@ -207,7 +221,12 @@ class TestExportMethods:
         # duplicate_rows must be present
         assert "duplicate_rows" in d
         # v0.1.4 keys present
-        for key in ("datetime_diagnostics", "drift_readiness", "missing_patterns", "leakage_report"):
+        for key in (
+            "datetime_diagnostics",
+            "drift_readiness",
+            "missing_patterns",
+            "leakage_report",
+        ):
             assert key in d
 
     def test_to_json_file(self, simple_df, tmp_path):
@@ -236,19 +255,19 @@ class TestExportMethods:
         md = report.to_markdown(path=str(path))
         assert os.path.exists(path)
         assert "# Data Health Report" in md
-        assert "## Summary"           in md
+        assert "## Summary" in md
         assert "## Numeric Diagnostics" in md
-        assert "Duplicate Rows"       in md   # added in fix session
+        assert "Duplicate Rows" in md  # added in fix session
 
-    def test_to_markdown_includes_deep_diagnostics(self,tmp_path):
+    def test_to_markdown_includes_deep_diagnostics(self, tmp_path):
         """Markdown must include v0.1.4 sections when data warrants them."""
         dates = pd.date_range("2023-01-01", periods=20, freq="D")
         df = pd.DataFrame({"event_date": dates, "val": range(20), "cat": ["A"] * 20})
         report = data_health_report(df)
         md = report.to_markdown()
-        assert "## Datetime Diagnostics"         in md
-        assert "## Categorical Drift Readiness"  in md
-        assert "## Temporal Leakage Detection"   in md
+        assert "## Datetime Diagnostics" in md
+        assert "## Categorical Drift Readiness" in md
+        assert "## Temporal Leakage Detection" in md
 
     def test_summary_no_crash(self, simple_df):
         report = data_health_report(simple_df)
@@ -257,15 +276,14 @@ class TestExportMethods:
 
 # 5. Numeric diagnostics
 
+
 class TestNumericDiagnostics:
     def test_skewed_column_flagged(self):
         rng = np.random.default_rng(0)
         df = pd.DataFrame(
             {
                 "normal": rng.standard_normal(100),
-                "skewed": np.concatenate(
-                    [rng.exponential(1, 97), [100, 200, 300]]
-                ),
+                "skewed": np.concatenate([rng.exponential(1, 97), [100, 200, 300]]),
             }
         )
         report = data_health_report(df)
@@ -283,6 +301,7 @@ class TestNumericDiagnostics:
 
 
 # 6. Recommendations logic
+
 
 class TestRecommendations:
     def test_high_missing_drop(self, titanic_like_df):
@@ -305,6 +324,7 @@ class TestRecommendations:
 
 # 7. Input validation
 
+
 class TestInputValidation:
     def test_list_raises_type_error(self):
         with pytest.raises(TypeError, match="Input must be a pandas DataFrame"):
@@ -321,6 +341,7 @@ class TestInputValidation:
 
 # 8. sklearn Pipeline integration
 
+
 class TestPipelineIntegration:
     def test_pipeline_fits_and_predicts(self):
         from sklearn.compose import ColumnTransformer
@@ -336,14 +357,14 @@ class TestPipelineIntegration:
         preprocessor = ColumnTransformer(
             transformers=[
                 ("cat", OneHotEncoder(), ["cat"]),
-                ("num", "passthrough",   ["num"]),
+                ("num", "passthrough", ["num"]),
             ]
         )
         pipe = Pipeline(
             [
-                ("inspect",      YReportInspector(categorical_cols=["cat"])),
+                ("inspect", YReportInspector(categorical_cols=["cat"])),
                 ("preprocessor", preprocessor),
-                ("model",        LogisticRegression()),
+                ("model", LogisticRegression()),
             ]
         )
         pipe.fit(x, y)
@@ -362,14 +383,16 @@ class TestPipelineIntegration:
         x = pd.DataFrame({"val": range(10), "date": dates})
         y = [0, 1] * 5
 
-        pipe = Pipeline([("inspect", YReportInspector()), ("passthrough", "passthrough")])
+        pipe = Pipeline(
+            [("inspect", YReportInspector()), ("passthrough", "passthrough")]
+        )
         pipe.fit(x, y)
 
         report = pipe.named_steps["inspect"].report_
         assert isinstance(report.datetime_diagnostics, dict)
-        assert isinstance(report.drift_readiness,      dict)
-        assert isinstance(report.missing_patterns,     dict)
-        assert isinstance(report.leakage_report,       dict)
+        assert isinstance(report.drift_readiness, dict)
+        assert isinstance(report.missing_patterns, dict)
+        assert isinstance(report.leakage_report, dict)
 
     def test_inspector_transform_passthrough(self):
         """YReportInspector.transform must return X unchanged."""
@@ -383,6 +406,7 @@ class TestPipelineIntegration:
 
 
 # 9. v0.1.4 — Datetime Diagnostics (#10)
+
 
 class TestDatetimeDiagnostics:
     def test_datetime_col_analysed(self, datetime_df):
@@ -401,8 +425,11 @@ class TestDatetimeDiagnostics:
     def test_irregular_frequency_flagged(self):
         # Deliberately irregular gaps
         dates = [
-            "2023-01-01", "2023-01-02", "2023-01-10",
-            "2023-02-01", "2023-03-15",
+            "2023-01-01",
+            "2023-01-02",
+            "2023-01-10",
+            "2023-02-01",
+            "2023-03-15",
         ]
         df = pd.DataFrame({"dt": pd.to_datetime(dates), "val": range(5)})
         report = data_health_report(df)
@@ -422,6 +449,7 @@ class TestDatetimeDiagnostics:
 
 # 10. v0.1.4 — Categorical Drift Readiness (#12)
 
+
 class TestCategoricalDriftReadiness:
     def test_high_cardinality_drift_risk(self):
         df = pd.DataFrame({"id_col": [str(i) for i in range(200)], "num": range(200)})
@@ -440,7 +468,11 @@ class TestCategoricalDriftReadiness:
         report = data_health_report(df)
         info = report.drift_readiness.get("almost_const", {})
         risks = " ".join(info.get("drift_risks", []))
-        assert "constant" in risks.lower() or "dominant" in risks.lower() or info["confidence"] in ("HIGH", "MEDIUM")
+        assert (
+            "constant" in risks.lower()
+            or "dominant" in risks.lower()
+            or info["confidence"] in ("HIGH", "MEDIUM")
+        )
 
     def test_low_risk_col_passes(self):
         df = pd.DataFrame({"cat": ["A", "B", "C", "D"] * 25, "num": range(100)})
@@ -458,6 +490,7 @@ class TestCategoricalDriftReadiness:
 
 
 # 11. v0.1.4 — Missing Pattern Clustering (#13)
+
 
 class TestMissingPatternClusters:
     def test_no_missing_returns_empty_clusters(self):
@@ -491,8 +524,7 @@ class TestMissingPatternClusters:
         )
         report = data_health_report(df)
         mechanism = (
-            report.missing_patterns
-            .get("column_mechanism", {})
+            report.missing_patterns.get("column_mechanism", {})
             .get("mcar_col", {})
             .get("mechanism")
         )
@@ -502,7 +534,9 @@ class TestMissingPatternClusters:
         report = data_health_report(simple_df)
         assert isinstance(report.missing_patterns.get("summary"), str)
 
+
 # 12. v0.1.4 — Temporal Leakage Detection (#14)
+
 
 class TestTemporalLeakageDetection:
     def test_future_dates_flagged_as_leakage(self):
@@ -552,7 +586,7 @@ class TestTemporalLeakageDetection:
         for col in report.column_types["datetime"]:
             assert col in report.leakage_report
             info = report.leakage_report[col]
-            assert "leakage_risks"   in info
-            assert "recommendation"  in info
+            assert "leakage_risks" in info
+            assert "recommendation" in info
 
-            assert "confidence"      in info
+            assert "confidence" in info

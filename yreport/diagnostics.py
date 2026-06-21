@@ -88,12 +88,16 @@ def datetime_diagnostics(df: pd.DataFrame, datetime_cols: list) -> dict:
         now = pd.Timestamp.now(tz=series.dt.tz)
         future_count = int((series > now).sum())
         if future_count > 0:
-            issues.append(f"{future_count} future dates detected — possible data leakage or entry error")
+            issues.append(
+                f"{future_count} future dates detected — possible data leakage or entry error"
+            )
 
         # --- Monotonicity ---
         is_monotonic = series.is_monotonic_increasing
         if not is_monotonic:
-            warnings.append("column is not sorted — consider sorting before time-series modelling")
+            warnings.append(
+                "column is not sorted — consider sorting before time-series modelling"
+            )
 
         all_issues = issues + warnings
         diagnostics[col] = {
@@ -115,6 +119,7 @@ def datetime_diagnostics(df: pd.DataFrame, datetime_cols: list) -> dict:
 
 
 # 12 — Categorical Drift Readiness Checks
+
 
 def categorical_drift_readiness(df: pd.DataFrame, categorical_cols: list) -> dict:
     """
@@ -147,7 +152,7 @@ def categorical_drift_readiness(df: pd.DataFrame, categorical_cols: list) -> dic
 
         n_unique = series.nunique()
         value_counts = series.value_counts(normalize=True)  # relative frequencies
-        top_freq = float(value_counts.iloc[0])              # most common category share
+        top_freq = float(value_counts.iloc[0])  # most common category share
 
         # Rare categories: share < 1%
         rare_cats = value_counts[value_counts < 0.01].index.tolist()
@@ -159,31 +164,47 @@ def categorical_drift_readiness(df: pd.DataFrame, categorical_cols: list) -> dic
         drift_risks: list[str] = []
 
         if n_unique > 50:
-            drift_risks.append(f"high cardinality ({n_unique} unique values) — unseen categories likely at inference")
+            drift_risks.append(
+                f"high cardinality ({n_unique} unique values) — unseen categories likely at inference"
+            )
         if rare_cats:
-            drift_risks.append(f"{len(rare_cats)} rare categories (<1% frequency) — vulnerable to distribution shift")
+            drift_risks.append(
+                f"{len(rare_cats)} rare categories (<1% frequency) — vulnerable to distribution shift"
+            )
         if top_freq > 0.95:
-            drift_risks.append(f"near-constant column ({top_freq:.1%} in one category) — low signal, may not generalise")
+            drift_risks.append(
+                f"near-constant column ({top_freq:.1%} in one category) — low signal, may not generalise"
+            )
         if entropy > 4.0 and n_unique <= 50:
-            drift_risks.append(f"high entropy ({entropy:.2f}) — very uniform distribution, encoding may be unstable")
+            drift_risks.append(
+                f"high entropy ({entropy:.2f}) — very uniform distribution, encoding may be unstable"
+            )
 
         results[col] = {
             "n_unique": n_unique,
             "top_category_frequency": round(top_freq * 100, 2),
             "rare_category_count": len(rare_cats),
             "entropy": round(entropy, 3),
-            "drift_risks": drift_risks if drift_risks else ["no significant drift risks detected"],
+            "drift_risks": (
+                drift_risks if drift_risks else ["no significant drift risks detected"]
+            ),
             "recommendation": (
-                "high drift risk — monitor in production" if drift_risks
+                "high drift risk — monitor in production"
+                if drift_risks
                 else "low drift risk"
             ),
-            "confidence": "HIGH" if len(drift_risks) >= 2 else ("MEDIUM" if drift_risks else "LOW"),
+            "confidence": (
+                "HIGH"
+                if len(drift_risks) >= 2
+                else ("MEDIUM" if drift_risks else "LOW")
+            ),
         }
 
     return results
 
 
 # 13 — Missing Pattern Clustering
+
 
 def missing_pattern_clusters(df: pd.DataFrame) -> dict:
     """
@@ -273,7 +294,7 @@ def missing_pattern_clusters(df: pd.DataFrame) -> dict:
 
     # Summary string
     mcar_cols = [c for c, v in column_mechanism.items() if v["mechanism"] == "MCAR"]
-    mar_cols  = [c for c, v in column_mechanism.items() if v["mechanism"] == "MAR"]
+    mar_cols = [c for c, v in column_mechanism.items() if v["mechanism"] == "MAR"]
     mnar_cols = [c for c, v in column_mechanism.items() if v["mechanism"] == "MNAR"]
 
     summary_parts = []
@@ -282,7 +303,9 @@ def missing_pattern_clusters(df: pd.DataFrame) -> dict:
     if mar_cols:
         summary_parts.append(f"MAR: {mar_cols} — impute using related columns")
     if mnar_cols:
-        summary_parts.append(f"MNAR: {mnar_cols} — consider indicator variable or domain fix")
+        summary_parts.append(
+            f"MNAR: {mnar_cols} — consider indicator variable or domain fix"
+        )
 
     return {
         "clusters": clusters,
@@ -292,6 +315,7 @@ def missing_pattern_clusters(df: pd.DataFrame) -> dict:
 
 
 # 14 — Temporal Leakage Detection
+
 
 def temporal_leakage_detection(df: pd.DataFrame, datetime_cols: list) -> dict:
     """
@@ -383,13 +407,19 @@ def temporal_leakage_detection(df: pd.DataFrame, datetime_cols: list) -> dict:
 
         results[col] = {
             "future_dates": future_count,
-            "leakage_risks": leakage_risks if leakage_risks else ["no leakage risks detected"],
+            "leakage_risks": (
+                leakage_risks if leakage_risks else ["no leakage risks detected"]
+            ),
             "recommendation": (
                 "high leakage risk — review before train/test split"
                 if leakage_risks
                 else "no leakage detected"
             ),
-            "confidence": "HIGH" if len(leakage_risks) >= 2 else ("MEDIUM" if leakage_risks else "LOW"),
+            "confidence": (
+                "HIGH"
+                if len(leakage_risks) >= 2
+                else ("MEDIUM" if leakage_risks else "LOW")
+            ),
         }
 
     return results

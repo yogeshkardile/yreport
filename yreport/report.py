@@ -29,19 +29,19 @@ class DataHealthReport:
         missing_patterns: dict = None,
         leakage_report: dict = None,
     ):
-        self.health_score         = health_score
-        self.shape                = shape
-        self.column_types         = column_types
-        self.missing_percentage   = missing_percentage
-        self.duplicate_rows       = duplicate_rows
-        self.warnings             = warnings
-        self.recommendations      = recommendations
-        self.numeric              = numeric
+        self.health_score = health_score
+        self.shape = shape
+        self.column_types = column_types
+        self.missing_percentage = missing_percentage
+        self.duplicate_rows = duplicate_rows
+        self.warnings = warnings
+        self.recommendations = recommendations
+        self.numeric = numeric
         # Deep diagnostics (default to empty dicts if not provided)
         self.datetime_diagnostics = datetime_diagnostics or {}
-        self.drift_readiness      = drift_readiness or {}
-        self.missing_patterns     = missing_patterns or {}
-        self.leakage_report       = leakage_report or {}
+        self.drift_readiness = drift_readiness or {}
+        self.missing_patterns = missing_patterns or {}
+        self.leakage_report = leakage_report or {}
 
     # summary()
 
@@ -93,14 +93,18 @@ class DataHealthReport:
         if self.datetime_diagnostics:
             print("\nDatetime Diagnostics:")
             for col, info in self.datetime_diagnostics.items():
-                print(f"  - {col}: freq={info.get('inferred_frequency', 'N/A')}, "
-                      f"issues={info.get('issues', [])}")
+                print(
+                    f"  - {col}: freq={info.get('inferred_frequency', 'N/A')}, "
+                    f"issues={info.get('issues', [])}"
+                )
 
         if self.drift_readiness:
             print("\nCategorical Drift Readiness:")
             for col, info in self.drift_readiness.items():
-                print(f"  - {col}: {info['recommendation']} "
-                      f"(confidence={info['confidence']})")
+                print(
+                    f"  - {col}: {info['recommendation']} "
+                    f"(confidence={info['confidence']})"
+                )
 
         if self.missing_patterns:
             print("\nMissing Pattern Clusters:")
@@ -109,8 +113,10 @@ class DataHealthReport:
         if self.leakage_report:
             print("\nTemporal Leakage Detection:")
             for col, info in self.leakage_report.items():
-                print(f"  - {col}: {info['recommendation']} "
-                      f"(confidence={info['confidence']})")
+                print(
+                    f"  - {col}: {info['recommendation']} "
+                    f"(confidence={info['confidence']})"
+                )
 
     # to_dict()
 
@@ -120,19 +126,19 @@ class DataHealthReport:
         All keys use consistent snake_case naming.
         """
         return {
-            "health_score":          self.health_score,
-            "shape":                 self.shape,
-            "column_types":          self.column_types,
-            "missing_percentage":    self.missing_percentage,
-            "duplicate_rows":        self.duplicate_rows,
-            "warnings":              self.warnings,
-            "recommendations":       self.recommendations,
-            "numeric_diagnostics":   self.numeric,
+            "health_score": self.health_score,
+            "shape": self.shape,
+            "column_types": self.column_types,
+            "missing_percentage": self.missing_percentage,
+            "duplicate_rows": self.duplicate_rows,
+            "warnings": self.warnings,
+            "recommendations": self.recommendations,
+            "numeric_diagnostics": self.numeric,
             # v0.1.4
-            "datetime_diagnostics":  self.datetime_diagnostics,
-            "drift_readiness":       self.drift_readiness,
-            "missing_patterns":      self.missing_patterns,
-            "leakage_report":        self.leakage_report,
+            "datetime_diagnostics": self.datetime_diagnostics,
+            "drift_readiness": self.drift_readiness,
+            "missing_patterns": self.missing_patterns,
+            "leakage_report": self.leakage_report,
         }
 
     # to_json()
@@ -149,7 +155,9 @@ class DataHealthReport:
 
         if path:
             with open(path, "w") as f:
-                json.dump(data, f, indent=4, default=str)  # default=str handles Timedelta etc.
+                json.dump(
+                    data, f, indent=4, default=str
+                )  # default=str handles Timedelta etc.
 
         return data
 
@@ -235,8 +243,12 @@ class DataHealthReport:
             for col, info in self.datetime_diagnostics.items():
                 lines.append(f"### {col}")
                 lines.append(f"- **Null %:** {info.get('null_percentage', 'N/A')}%")
-                lines.append(f"- **Inferred Frequency:** {info.get('inferred_frequency', 'N/A')}")
-                lines.append(f"- **Timezone Aware:** {info.get('timezone_aware', 'N/A')}")
+                lines.append(
+                    f"- **Inferred Frequency:** {info.get('inferred_frequency', 'N/A')}"
+                )
+                lines.append(
+                    f"- **Timezone Aware:** {info.get('timezone_aware', 'N/A')}"
+                )
                 lines.append(f"- **Future Dates:** {info.get('future_dates', 0)}")
                 lines.append(f"- **Monotonic:** {info.get('is_monotonic', 'N/A')}")
                 for issue in info.get("issues", []):
@@ -250,7 +262,9 @@ class DataHealthReport:
             for col, info in self.drift_readiness.items():
                 lines.append(f"### {col}")
                 lines.append(f"- **Unique Values:** {info['n_unique']}")
-                lines.append(f"- **Top Category Frequency:** {info['top_category_frequency']}%")
+                lines.append(
+                    f"- **Top Category Frequency:** {info['top_category_frequency']}%"
+                )
                 lines.append(f"- **Rare Categories:** {info['rare_category_count']}")
                 lines.append(f"- **Entropy:** {info['entropy']}")
                 for risk in info.get("drift_risks", []):

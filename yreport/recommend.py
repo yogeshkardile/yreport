@@ -4,7 +4,9 @@ import pandas as pd
 from scipy.stats import skew
 
 
-def generate_recommendations(df: pd.DataFrame, drop_cols: set, column_types: dict) -> dict:
+def generate_recommendations(
+    df: pd.DataFrame, drop_cols: set, column_types: dict
+) -> dict:
     """
     Produce actionable recommendations for missing-value handling
     and categorical encoding.

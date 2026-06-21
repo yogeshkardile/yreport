@@ -38,19 +38,19 @@ def data_health_report(
         raise TypeError("Input must be a pandas DataFrame")
 
     # Normalise all col-list arguments to sets
-    drop_cols        = set(drop_cols or [])
+    drop_cols = set(drop_cols or [])
     categorical_cols = set(categorical_cols or [])
-    numeric_cols     = set(numeric_cols or [])
-    ignore_cols      = set(ignore_cols or [])
+    numeric_cols = set(numeric_cols or [])
+    ignore_cols = set(ignore_cols or [])
 
     # Drop ignored columns from the working copy
     df = df.drop(columns=ignore_cols, errors="ignore")
 
     # --- Column type detection ---
     column_types = detect_column_types(df)
-    column_types["numeric"]     = set(column_types["numeric"])
+    column_types["numeric"] = set(column_types["numeric"])
     column_types["categorical"] = set(column_types["categorical"])
-    column_types["datetime"]    = set(column_types["datetime"])
+    column_types["datetime"] = set(column_types["datetime"])
 
     # Apply user overrides — categorical takes priority over auto-numeric
     if categorical_cols:
@@ -83,7 +83,7 @@ def data_health_report(
 
     # Existing recommendations & numeric diagnostics
     recommendations = generate_recommendations(df, drop_cols, column_types)
-    numeric         = numeric_diagnostics(df, column_types["numeric"])
+    numeric = numeric_diagnostics(df, column_types["numeric"])
 
     # --- v0.1.4 Deep Diagnostics ---
 
@@ -120,7 +120,7 @@ def data_health_report(
 
     # --- Final weighted score, clamped to [0, 100] ---
     raw_score = (
-        missing_score  * WEIGHTS["missing"]
+        missing_score * WEIGHTS["missing"]
         + duplicate_score * WEIGHTS["duplicates"]
         + cardinality_score * WEIGHTS["cardinality"]
     ) * 100
@@ -134,7 +134,7 @@ def data_health_report(
         missing_percentage=(df.isnull().mean() * 100).round(2).to_dict(),
         duplicate_rows=int(df.duplicated().sum()),
         warnings={
-            "high_missing":    [
+            "high_missing": [
                 col for col, pct in (df.isnull().mean() * 100).items() if pct > 30
             ],
             "high_cardinality": high_card_cols,

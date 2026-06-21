@@ -46,7 +46,7 @@ class YReportInspector(BaseEstimator, TransformerMixin):
             x,
             drop_cols=self.drop_cols,
             categorical_cols=self.categorical_cols,
-            numeric_cols=self.numerical_cols,   # maps to health.py param name
+            numeric_cols=self.numerical_cols,  # maps to health.py param name
             ignore_cols=self.ignore_cols,
         )
         return self
