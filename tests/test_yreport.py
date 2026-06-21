@@ -18,7 +18,6 @@ Covers:
 """
 
 import json
-import math
 import os
 
 import numpy as np
@@ -44,7 +43,6 @@ def simple_df():
 @pytest.fixture
 def titanic_like_df():
     """Titanic-shaped DataFrame for recommendation and warning tests."""
-    rng = np.random.default_rng(42)
     n = 100
     return pd.DataFrame(
         {
